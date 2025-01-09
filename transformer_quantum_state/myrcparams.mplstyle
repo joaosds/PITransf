@@ -1,0 +1,35 @@
+text.usetex : False
+text.latex.preamble :  \usepackage{amsmath}
+font.serif : cm10
+mathtext.fontset : cm
+font.family : serif
+axes.unicode_minus : True
+axes.linewidth : 2.4
+axes.labelsize : 15
+legend.fontsize: 10
+axes.titlesize : 14
+figure.titlesize: 14
+
+# Tick parameters
+xtick.direction: in
+ytick.direction: in
+xtick.major.width: 1.5
+ytick.major.width: 1.5
+xtick.minor.width: 1.5
+ytick.minor.width: 1.5
+xtick.major.size: 7
+ytick.major.size: 7
+xtick.minor.size: 4
+ytick.minor.size: 4
+
+
+xtick.top : True
+ytick.right : True
+# Font sizes
+xtick.labelsize: 15
+ytick.labelsize: 15
+
+# Enable minor ticks
+xtick.minor.visible: True
+ytick.minor.visible: True
+

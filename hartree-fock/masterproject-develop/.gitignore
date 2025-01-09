@@ -1,0 +1,15 @@
+HF.py
+!rbm_paper/
+!rbm_paper/*/
+# RawResults/*
+# !RawResults/newest/
+# !RawResults/newest/*
+# !RawResults/newest/*/*
+# !RawResults/newest/*/*/*
+# !RawResults/newest/*/*/*/*
+# !RawResults/HF_results/
+# !RawResults/HF_results/*
+# !RawResults/HF_results/*/*
+# !RawResults/HF_results/*/*/*
+# !RawResults/HF_results/*/*/*/*
+Results/

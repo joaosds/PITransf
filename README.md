@@ -10,8 +10,8 @@ Authors: João Augusto Sobral (University of Stuttgart), Michael Perle (Universi
 
 arXiv link: [arXiv:2208.01758](https://arxiv.org/abs/2208.01758)
 
-This repository contains code adapted from the [Yuanhangzhang98/transformer_quantum_state](https://github.com/yuanhangzhang98/transformer_quantum_state).
+This repository contains code adapted from the [Yuanhangzhang98/transformer_quantum_state](https://github.com/yuanhangzhang98/transformer_quantum_state), and 
+from [SOAP](https://github.com/nikhilvyas/SOAP).
 
-João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open_source), Sayan Banerjee, Lucas Pupim, Vitor Dantas and Michael Muehlbauer.
-
+João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open_source).
 

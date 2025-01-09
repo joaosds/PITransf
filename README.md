@@ -2,7 +2,7 @@
 
 This repository contains all the scripts used to generate and analyze the data in the paper "Transformer in variational bases for electronic quantum states". 
 
-Note: It needs some refactoring.
+Note: Be aware, it still needs some refactoring (to be done soon).
 
 
 Authors: João Augusto Sobral (University of Stuttgart), Michael Perle (University of Innsbruck) and Mathias S. Scheurer (University of Stuttgart).

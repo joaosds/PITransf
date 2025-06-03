@@ -11,5 +11,5 @@ Authors: João Augusto Sobral (University of Stuttgart), Michael Perle (Universi
 The main code is adapted from the [Yuanhangzhang98/transformer_quantum_state](https://github.com/yuanhangzhang98/transformer_quantum_state), and 
 from [SOAP](https://github.com/nikhilvyas/SOAP).
 
-João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open.source).
+João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open source).
 

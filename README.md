@@ -1,4 +1,4 @@
-# Transformer in variational bases for electronic quantum states
+# Physics-informed Transformers for Electronic Quantum States
 
 This repository contains all the scripts used to generate and analyze the data in the paper "Transformer in variational bases for electronic quantum states". 
 

@@ -40,7 +40,7 @@ You can set up the environment in two ways: using conda (recommended) or using v
 
 1. **Create environment from file:**
 ```bash
-conda env create -f environment.yml
+conda env create -f requirements.yml
 ```
 
 2. **Activate the environment:**
@@ -90,12 +90,25 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 ### Basic Usage
 
-Run with default parameters:
+Run with default parameters ($N_{e}=6$, $t/U=0.18$ and hf-basis):
 ```bash
 ./main.sh
 ```
 
-To run with custom parameters, please edit the "config.sh" file. 
+To run with custom parameters, please edit the "config.sh" file. This file already explains each of the parameters, but here are some additional comments with the 
+corresponding notation on the main text:
+
+- `N`: System size (number of electrons) [$N_{e}$]
+- `t`: Hopping parameter  [$t/U$]
+- `basis`: Basis type (`"hf"`, `"chiral"`, or `"band"`)
+- `niter`: Training iterations [Epochs]
+- `embedding_size`: Embedding dimension [$d_{\text{emb}}$]
+- `ndec_layer`: Number of transformer decoder layers [$N_{\text{dec}}$]
+- `nhead`: Number of transformer attention heads [$N_{\text{h}}$]
+- `nunique`: Number of unique states for the batch-autoregressive sampler[$N_{u}$]. Note that if this is less than $2^{N_{e}}$, $n_{u}^{f}$ may be different from this value. See ref. [38] on the main text for more details.
+- `nbatch`: Batch size for the batch-autoregressive sampler [$N_{s}$]
+- `sec_batch`: Parallel batch size [$N_{\text{h}}$]. This divides the number of local energy estimators. This is very useful when running the code on a gpu, especially when using either the chiral or band bases. 
+- `identifier`: String identifier for the plots and result files.
 
 ### Configuration
 
@@ -105,12 +118,6 @@ cp config.sh my_config.sh
 # Edit my_config.sh with your parameters
 ```
 
-**Key Parameters:**
-- `N`: System size (number of particles/sites)
-- `t`: Hopping parameter (understood as t/U)  
-- `basis`: Basis type (`"hf"`, `"chiral"`, or `"band"`)
-- `niter`: Training iterations
-- `embedding_size`: Embedding dimension
 
 ### Project Structure
 

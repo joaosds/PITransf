@@ -12,7 +12,7 @@
 N=6
 
 # Hopping parameter
-t=0.14
+t=0.18
 
 # Basis type: "hf" (Hartree-Fock), "chiral", or "band"
 basis="hf"
@@ -34,7 +34,7 @@ ed_limit=11
 # =============================================================================
 
 # Training iterations
-niter=2000
+niter=10000
 
 # Batch size
 nbatch=100000000
@@ -48,8 +48,8 @@ sec_batch=20
 # Number of attention heads
 nhead=2
 
-# Number of encoder layers
-nenclayer=2
+# Number of decoder layers
+ndeclayer=2
 
 # Embedding dimension
 demb=300

@@ -93,7 +93,7 @@ corresponding notation on the main text:
 - `nhead`: Number of transformer attention heads ($N_{\text{h}}$).
 - `nunique`: Number of unique states for the batch-autoregressive sampler ($N_{u}$). Note that if this is less than $2^{N_{e}}$, $n_{u}^{f}$ may be different from this value. See ref. [38] on the main text for more details.
 - `nbatch`: Batch size for the batch-autoregressive sampler ($N_{s}$).
-- `sec_batch`: Parallel batch size ($N_{\text{h}}$). This divides the number of local energy estimators. This is very useful when running the code on a GPU, especially when using either the chiral or band bases. 
+- `sec_batch`: Parallel batch size. This divides the total number of local energy estimators to be processed in parallel. This option is quite useful when running the code on a GPU, especially when using either the chiral or band bases. For small tests, you can set it to 1.
 - `identifier`: String identifier for the plots and result files.
 
 ### Project Structure

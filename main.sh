@@ -1,9 +1,4 @@
 #!/bin/bash
-
-# Quantum State Transformer - Main Execution Script
-# This script orchestrates Hartree-Fock calculations, Exact Diagonalization, 
-# and Transformer training for quantum many-body systems
-
 set -e  # Exit on any error
 
 # =============================================================================

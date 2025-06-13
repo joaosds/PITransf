@@ -1,9 +1,4 @@
 #!/bin/bash
-
-# Quantum State Transformer - Configuration File
-# Copy this file and modify the values as needed
-# Usage: CONFIG_FILE=my_config.sh ./main.sh
-
 # =============================================================================
 # PHYSICS PARAMETERS
 # =============================================================================

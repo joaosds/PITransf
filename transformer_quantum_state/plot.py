@@ -29,7 +29,6 @@ def create_plots(data, flags=None):
             'plot_n': True,
             'plot_it': True,
             'plot_it_hist_weigh': True,
-            'plot_attention': False,
             'pcaplot': True,
         }
     
@@ -59,10 +58,6 @@ def create_plots(data, flags=None):
         if flags.get('plot_it_hist_weigh', False):
             plot_histogram_weighted(data)
             print("✓ Weighted histogram plots created")
-        
-        if flags.get('plot_attention', False):
-            plot_attention_matrix(data)
-            print("✓ Attention matrix plots created")
         
         if flags.get('pcaplot', False):
             plot_pca_analysis(data)
@@ -374,56 +369,6 @@ def plot_loss(data):
     filename = os.path.join(data['system_output_dir'], f"{data['identifier']}_loss_{data['t']}.pdf")
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
-
-
-# ============================= ATTENTION ANALYSIS =============================
-
-def plot_attention_matrix(data):
-    """
-    Plot attention matrices from the transformer model
-    
-    This function creates visualizations of the attention patterns
-    across different heads and layers of the transformer.
-    """
-    try:
-        model = data.get('model')
-        samples = data.get('samples')
-        
-        if model is None or samples is None:
-            print("Model or samples not available for attention analysis")
-            return
-            
-        # Get attention weights from model (this would need to be implemented in your model)
-        # For now, create a placeholder plot
-        fig, ax = plt.subplots(figsize=(10, 8))
-        
-        # Create dummy attention matrix for demonstration
-        n_tokens = samples.shape[0] if samples is not None else 10
-        attention_matrix = np.random.rand(n_tokens, n_tokens)
-        
-        im = ax.imshow(attention_matrix, cmap='Blues', aspect='auto')
-        ax.set_title('Attention Matrix (Placeholder)', fontsize=16)
-        ax.set_xlabel('Key Position', fontsize=14)
-        ax.set_ylabel('Query Position', fontsize=14)
-        
-        # Add colorbar
-        plt.colorbar(im, ax=ax, label='Attention Weight')
-        
-        # Add grid
-        ax.set_xticks(range(n_tokens))
-        ax.set_yticks(range(n_tokens))
-        ax.grid(True, alpha=0.3)
-        
-        plt.tight_layout()
-        filename = os.path.join(data['system_output_dir'], f"{data['identifier']}_attention_{data['t']}.pdf")
-        plt.savefig(filename, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        print("Note: Attention plot is a placeholder. To get real attention weights,")
-        print("you'll need to modify your transformer model to return attention matrices.")
-        
-    except Exception as e:
-        print(f"Error in attention plotting: {e}")
 
 
 # ============================= HISTOGRAM ANALYSIS =============================
@@ -800,18 +745,12 @@ def generate_all_plots(data_dict, output_dir=None, flags=None):
             'plot_n': True,
             'plot_it': True,
             'plot_it_hist_weigh': True,
-            'plot_attention': False,  # Requires special model setup
             'pcaplot': True,
         }
-    
-    print("=" * 50)
-    print("QUANTUM STATE PLOTTING SUITE")
-    print("=" * 50)
     
     try:
         create_plots(data_dict, flags)
         print("\n" + "=" * 50)
-        print("ALL PLOTS GENERATED SUCCESSFULLY!")
         print(f"Output directory: {data_dict['system_output_dir']}")
         print("=" * 50)
     except Exception as e:

@@ -1,20 +1,147 @@
-# -*- coding: utf-8 -*-
 import os
 import torch
 
-from Hamiltonian_utils import construct_G, construct_q, construct_k
-from Hamiltonian_utils import V
+# Get default device for tensor operations
+device = torch.device(torch.get_default_device())
 
-
+# Pauli matrices for spin operations
 sigma_0 = torch.eye(2)
 sigma_x = torch.tensor([[0, 1.0], [1.0, 0]], dtype=torch.complex64)
 sigma_y = torch.tensor([[0, -1.0j], [1.0j, 0]], dtype=torch.complex64)
 sigma_z = torch.tensor([[1.0, 0], [0, -1.0]], dtype=torch.complex64)
 
 
+# ============================= UTILITY FUNCTIONS =============================
+
+def V(q, n):
+    """
+    Interaction potential in momentum space
+    
+    Args:
+        q: momentum transfer
+        n: system size
+        
+    Returns:
+        Interaction strength V(q)
+    """
+    return torch.tensor(1 / (1 + q * q) / (2 * n), dtype=torch.float32)
+
+
+def construct_G(nbz, potential, length):
+    """
+    Construct momentum grid for potential interactions including boundaries
+    
+    Args:
+        nbz: Number of Brillouin zones
+        potential: Potential function V(q, n)
+        length: System size (number of sites/electrons)
+        
+    Returns:
+        torch.Tensor: Array of shape (N_G, 3) containing [index, momentum, V(momentum)]
+    """
+    G_pot = []
+    G_index_blank = []
+    G_units_of_2pi = []
+    
+    for i in range(-nbz, nbz + 1):
+        potential_G = potential(i * 2 * torch.pi, length).clone().detach()
+        index = (i * length).clone().detach()
+        unitsofpi = torch.tensor(i * 2 * torch.pi).clone().detach()
+        
+        G_pot.append(potential_G)
+        G_index_blank.append(index)
+        G_units_of_2pi.append(unitsofpi)
+    
+    G_index_blank = torch.tensor(G_index_blank)
+    G_pot = torch.tensor(G_pot).clone().detach()
+    G_units_of_2pi = torch.tensor(G_units_of_2pi)
+    
+    return torch.stack((G_index_blank, G_units_of_2pi, G_pot)).transpose(0, 1)
+
+
+def construct_q(nbz, potential, length):
+    """
+    Construct momentum grid for potential interactions excluding boundaries
+    
+    Args:
+        nbz: Number of Brillouin zones
+        potential: Potential function V(q, n)
+        length: System size (number of sites/electrons)
+        
+    Returns:
+        torch.Tensor: Array of shape (N_q, 3) containing [index, momentum, V(momentum)]
+    """
+    q_pot = []
+    q_index_blank = []
+    
+    for i in range(-nbz * length, nbz * length + 1):
+        if i % length:  # q must not be in boundaries of BZ
+            q_index_blank.append(i)
+    
+    # Convert indices to momentum values
+    qtemp = torch.tensor(
+        [float(i) * 2.0 * torch.pi / float(length) for i in q_index_blank],
+        dtype=torch.float32,
+    )
+    
+    # Calculate potential for each momentum
+    for i in range(len(qtemp)):
+        potential_q = potential(qtemp[i], float(length))
+        q_pot.append(potential_q)
+
+    return torch.stack(
+        (torch.tensor(q_index_blank), torch.tensor(qtemp), torch.tensor(q_pot))
+    ).transpose(0, 1)
+
+
+def construct_k(length):
+    """
+    Construct momentum grid for kinetic energy terms
+    
+    Args:
+        length: System size (number of sites/electrons)
+        
+    Returns:
+        torch.Tensor: Array of shape (length, 2) containing [index, momentum]
+    """
+    k_index = torch.arange(length, dtype=torch.int32)
+    k_value = torch.linspace(
+        start=-torch.pi, 
+        end=torch.pi * (1.0 - 2.0 / float(length)), 
+        steps=length
+    )
+    
+    
+    return torch.stack(
+        (
+            torch.tensor(k_index, dtype=torch.uint16),
+            torch.tensor(k_value, dtype=torch.float32),
+        )
+    ).transpose(0, 1)
+
+
+# ============================= HAMILTONIAN CLASSES =============================
 
 class Hamiltonian:
+    """
+    Base class for quantum many-body Hamiltonians
+    
+    Each child class should specify:
+    - self.n: system size
+    - self.H: list of tuples describing Hamiltonian terms
+    """
+    
     def __init__(self):
+        """
+        Initialize base Hamiltonian class
+        
+        Attributes:
+            system_size: Physical dimensions of the system
+            n: Total number of degrees of freedom
+            H: List of Hamiltonian terms
+            symmetry: Symmetries of the system
+            n_dim: Spatial dimensionality
+        """
         self.system_size = None
         self.n = None
         self.H = None
@@ -22,144 +149,81 @@ class Hamiltonian:
         self.n_dim = None
 
     def update_param(self, param):
+        """
+        Update coefficients in the Hamiltonian
+        
+        Args:
+            param: torch.Tensor of shape (n_param,) containing new parameters
+            
+        Note:
+            Default implementation assumes coefficients are (n_op,) same in every group.
+            Override this method for specific Hamiltonian forms.
+        """
         assert len(param) == len(self.H)
-        for i, param_i in enumerate(param):  # (1, )
+        for i, param_i in enumerate(param):
             self.H[i][1][:] = [param_i] * len(self.H[i][1])
-
-    # @torch.no_grad()
-    # def ElocFM2(
-    #     self, samples, Uk, model, k, q, g, alfa0, alfa1, alfa2, alfa3, use_symmetry=True
-    # ):
-    #     # samples: (seq, batch, input_dim)
-    #     symmetry = self.symmetry if use_symmetry else None
-    #     E = 0
-    #     E2 = 0
-    #     E3 = 0
-    #     Et = 0
-    #     Et2 = 0
-    #     Et3 = 0
-    #     # params = model.param  # (n_param, )
-    #     # self.update_param(params)
-    #     # return results, results2, results3, resultsnl, resultsnl2, resultsnl3, norm
-    #     # return results, resultsnl, norm
-    #     # VECTORIZE THIS
-    #     for Hi in self.H:
-    #         # list of tensors, (n_op, batch)
-    #         h = float(Hi[0])
-    #         print(h)
-    #
-    #         print(samples.shape, "pacoca")
-    #         # return results, results2, results3, results3loss, resultsnl, resultsnl2, resultsnl3, resultsnl3loss, norm
-    #         start_time = time.perf_counter()
-    #         E, E2, E3, Onl, Onl2, Onl3, norm, Occ = compute_observableFMHF(
-    #             model,
-    #             samples,
-    #             Uk,
-    #             Hi,
-    #             k,
-    #             q,
-    #             g,
-    #             alfa1,
-    #             alfa2,
-    #             alfa3,
-    #             batch_mean=False,
-    #             symmetry=symmetry,
-    #         )
-    #         end_time = time.perf_counter()
-    #         execution_time = end_time - start_time
-    #         print(f"TEST1: {execution_time} seconds")
-    #         #print(torch.stack(O3).shape)
-    #         # for Oj in O:
-    #         #     E += Oj.sum(dim=0)
-    #         # for Oj2 in O2:
-    #         #     E2 += Oj2.sum(dim=0)
-    #         # for Oj3 in O3:
-    #         #     E3 += Oj3.sum(dim=0)
-    #         #     # Stack the tensors along a new dimension
-    #         #O_stacked = torch.stack(O)
-    #         #O2_stacked = torch.stack(O2)
-    #         #O3_stacked = torch.stack(O3)
-    #
-    #         # Sum along the appropriate dimensions
-    #         #E = O_stacked.sum(dim=(0, 1))
-    #         #E2 = O2_stacked.sum(dim=(0, 1))
-    #         #E3 = O3_stacked.sum(dim=(0, 1))
-    #
-    #         # Compute Et, Et2, and Et3
-    #         Et = Onl[0] + E
-    #         Et2 = Onl2[0] + E2
-    #         Et3 = Onl3[0] + E3
-    #         # _, batch = psi[0].shape
-    #         # print(psi[0].shape)
-    #         # for Ojj in psi:
-    #         #     psis_psi += np.array(Ojj).sum(dim=1)
-    #         # Et = - Onl[0] + E
-    #         # print("aqui", Et)
-    #         Et = Onl[0] + E
-    #         Et2 = Onl2[0] + E2
-    #         Et3 = Onl3[0] + E3
-    #         # print(Et)
-    #     return (
-    #         Et,
-    #         Et2,
-    #         Et3,
-    #         h,
-    #         Onl[0],
-    #         Onl2[0],
-    #         Onl3[0],
-    #         E,
-    #         E2,
-    #         E3,
-    #         norm,
-    #         Occ[0],
-    #     )
-
-    # def full_H(self, param=None):
-    #     raise NotImplementedError
-    #
-    # def calc_E_ground(self, param=None):
-    #     if param is None:
-    #         full_Hamiltonian = self.full_H()
-    #     else:
-    #         full_Hamiltonian = self.full_H(param)
-    #     [E_ground, psi_ground] = eigsh(full_Hamiltonian, k=1, which="SA")
-    #     E_ground = E_ground[0]
-    #     psi_ground = psi_ground[:, 0]
-    #     self.E_ground = E_ground
-    #     self.psi_ground = psi_ground
-    #     return E_ground
 
 
 class FermionicModel(Hamiltonian):
     def __init__(self, system_size, t, periodic=True):
+        """
+        Initialize fermionic model
+        
+        Args:
+            system_size: System dimensions (list or tensor)
+            t: Hopping parameter
+            periodic: Whether to use periodic boundary conditions
+        """
         super().__init__()
+        
+        # System configuration
         self.system_size = torch.tensor(system_size).reshape(-1)
-        self.n_dim = len(self.system_size)  # Dimension of the model
-        self.n = self.system_size.prod()  # Number of electrons
-        self.param_dim = 1  # Only one tweakable parameter, hopping t
-        self.param_range = torch.tensor([[0.05], [1.5]])
-
+        self.n_dim = len(self.system_size)  # Spatial dimension
+        self.n = self.system_size.prod()    # Total number of sites/electrons
+        
+        # Model parameters
+        self.param_dim = 1  # Only hopping parameter t is tunable
+        self.param_range = torch.tensor([[0.05], [1.5]])  # Valid range for t
+        
+        # Physical parameters
         self.t = t  # Hopping parameter
-        self.n_dim = len(self.system_size)
-        self.H = [
-            ([self.t]),
-        ]
-
-        self.potential = V
-        self.nbz = 1
+        self.H = [([self.t])]  # Hamiltonian terms
+        
+        # Interaction setup
+        self.potential = V  # Interaction potential function
+        self.nbz = 1        # Number of Brillouin zones
         self.sumOverG = False
-
-        self.G = construct_G(self.nbz, self.potential, self.n)
-        self.q = construct_q(self.nbz, self.potential, self.n)
-        self.k = construct_k(self.n)
-
+        
+        # Construct momentum space grids
+        self.G = construct_G(self.nbz, self.potential, self.n)  # With boundaries
+        self.q = construct_q(self.nbz, self.potential, self.n)  # Without boundaries  
+        self.k = construct_k(self.n)                            # Kinetic momenta
+        
     def update_param(self, param):
-        # param: (1, )
-        self.H[0][1][0] = param  # First element of self.t will be updated
+        """
+        Update hopping parameter
+        
+        Args:
+            param: New hopping parameter value
+        """
+        self.H[0][1][0] = param
+        self.t = param
 
+    def get_info(self):
+        """
+        Get model information for logging
+        
+        Returns:
+            dict: Model parameters and configuration
+        """
+        return {
+            'model_type': 'FermionicModel',
+            'system_size': self.system_size.tolist(),
+            'n_sites': self.n.item(),
+            'hopping_t': self.t,
+            'n_momentum_G': len(self.G),
+            'n_momentum_q': len(self.q),
+            'n_momentum_k': len(self.k),
+            'param_range': self.param_range.tolist()
+        }
 
-if __name__ == "__main__":
-    try:
-        os.mkdir("results/")
-    except FileExistsError:
-        pass

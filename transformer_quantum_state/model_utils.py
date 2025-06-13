@@ -23,6 +23,27 @@ sig = torch.stack([sigma_x, sigma_y, sigma_z])
 
 @torch.no_grad()
 def treesamplerumap(model, batch=10000, max_unique=1000):
+    """
+
+    Parameters
+    ----------
+    model : The transformer model
+    batch : int, optional
+        Number of samples to generate. The default is 10000.
+    max_unique: int, optional
+        The maximum number of unique samples to generate. The default is 1000.
+
+    Returns
+    -------
+    samples : (n, batch)
+        sampled binary configurations
+
+    # TODO: cache the intermediate hidden states for reusing during inference
+    #       can save about half inference time
+    #       example implementation: https://github.com/facebookresearch/fairseq
+    #       may take too much effort; optimize when necessary
+
+    """
     batch0 = batch
     assert (
         model.phys_dim == 2
@@ -114,6 +135,27 @@ def treesamplerumap(model, batch=10000, max_unique=1000):
 
 @torch.no_grad()
 def treesampler(model, batch=10000, max_unique=1000):
+    """
+
+    Parameters
+    ----------
+    model : The transformer model
+    batch : int, optional
+        Number of samples to generate. The default is 10000.
+    max_unique: int, optional
+        The maximum number of unique samples to generate. The default is 1000.
+
+    Returns
+    -------
+    samples : (n, batch)
+        sampled binary configurations
+
+    # TODO: cache the intermediate hidden states for reusing during inference
+    #       can save about half inference time
+    #       example implementation: https://github.com/facebookresearch/fairseq
+    #       may take too much effort; optimize when necessary
+
+    """
     batch0 = batch
     assert (
         model.phys_dim == 2
@@ -200,11 +242,41 @@ def treesampler(model, batch=10000, max_unique=1000):
 
         # Final sample weight calculation
 
+    # print("src is this thing here", src.shape)
+    # print(src[0])
+    # plt.matshow(src[0, :])
+    # plt.show()
+    # print(src[0, :, :])
+    # print(src[1, :, :])
+    # print(src[2, :, :])
+    # print(src[3, :, :])
+
     return samples, sample_weight, idxns  # (n, batch), (batch, )
 
 
 @torch.no_grad()
 def normalsampler(model, batch=10000):
+    """
+
+
+    Parameters
+    ----------
+    model : The transformer model
+    batch : int, optional
+        Number of samples to generate. The default is 10000.
+
+    Returns
+    -------
+    samples : (n, batch)
+        sampled binary configurations
+
+    TODO: cache the intermediate hidden states for reusing during inference
+          can save about half inference time
+          example implementation: https://github.com/facebookresearch/fairseq
+          may take too much effort; optimize when necessary
+
+    """
+    batch0 = batch
     n = model.system_size.prod()
     samples = torch.zeros((0, batch), dtype=torch.uint8)
     for i in range(n):
@@ -220,8 +292,30 @@ def normalsampler(model, batch=10000):
 
 
 def compute_psi(model, samples, check_duplicate=True):
+    """
+
+
+    Parameters
+    ----------
+    model : The transformer model
+    samples : Tensor, (n, batch)
+        samples drawn from the wave function
+    check_duplicate : bool, optional
+        whether to check for duplicate samples. The default is False.
+
+    Returns
+    -------
+    log_amp : (batch, )
+    log_phase : (batch, )
+
+    extract the relevant part of the distribution, ignore the last output
+    and the param distribution
+    """
+
     if check_duplicate:
         samples, inv_idx = torch.unique(samples, dim=1, return_inverse=True)
+
+    # This thing changes the order of the samples with respect to the one we have in the sample tree
 
     n, batch = samples.shape
     n_idx = torch.arange(n).reshape(n, 1)
@@ -232,6 +326,9 @@ def compute_psi(model, samples, check_duplicate=True):
     (log_amp, log_phase), emb = model.forward(
         samples, compute_phase=True
     )  # (seq, batch, phys_dim)
+
+    # The decrease of dimension is basically removing the J initializer and just leaving
+    # the spin terms
 
     log_amp = log_amp[:-1]  # (n, batch, phys_dim)
     log_phase = log_phase[:-1]  # (n, batch, phys_dim)
@@ -276,6 +373,8 @@ def Hloc(
 
     # Calculate the psi(sp)/psi for each group
     psisp_s = torch.exp((log_amp_diff + 1j * log_phase_diff) / 2)
+    psisp = torch.exp((log_amp_2[indices] + 1j * log_phase_2[indices]) / 2)
+    # log_amp_2 dim is changed from (batch*ne) to  (batch, ne) when indices is applied
     psis = torch.exp((log_amp + 1j * log_phase) / 2)
     # Create empty list to organize energies into groups (that scatter to HF or not)
     results = []
@@ -313,6 +412,12 @@ def Hloc(
     )  # (ne, 2, 2)
 
     # # Masks
+    # mask1 = (nsp[:] != n) & (ns[:] == n)
+    # mask2 = (nsp[:] == n) & (ns[:] != n)
+    # mask3 = (nsp[:] != n) & (ns[:] != n)
+    # mask4 = ns[:] != n
+    si_hf = ns[:] == n  # Initial state si=HF
+    si_hf2 = si_hf[:].expand(n, batch)
     sf_hf = nsp[:] == n  # Final state sf=HF
     sf_hf = sf_hf.view(batch, n).T  # (n, batch)
 
@@ -390,7 +495,15 @@ def Hloc(
     )
     # First, get all the ones with sf_nhf, this is needed since the dimension of this is
     # n*batch > dim(si_hf) = batch
+    # result_i3temp[:, :] = torch.where(sf_hf, result, torch.zeros_like(result))
+    # result_i3temp[:, :] = torch.where(
+    #     si_nhf, result_i3temp, torch.zeros_like(result_i3temp)
+    # )
     result_i3temp[:, :] = torch.where(mask, result, torch.zeros_like(result))
+    # result_i3temp[:, :] = torch.where(
+    #     sf_hf, result_i3temp, torch.zeros_like(result_i3temp)
+    # )
+    # result_i3temp[:, :] = torch.where(mask, result, torch.zeros_like(result))
     result_i3[:, :] += result_i3temp[:, :]
 
     occupation_in = torch.stack(
@@ -463,6 +576,7 @@ def Hloc(
         mask, occupation_inz, torch.zeros_like(occupation_inz)
     )
     # First, get all the ones with sf_nhf, this is needed since the dimension of this is
+    # n*batch > dim(si_hf) = batch
     result_i2temp[:, :] = torch.where(mask, result, torch.zeros_like(result))
     result_i2[:, :] += result_i2temp[:, :]
 
@@ -485,6 +599,31 @@ def Hloc(
 
 
 def compute_grad(model, samples, sample_weight, Eloc, ave, idxns):
+    """
+
+
+    Parameters
+    ----------
+    model : The transformer model
+    samples : (n, batch)
+        batched sample from the transformer distribution
+    sample_weight: (batch, )
+        weight for each sample
+    Eloc : (batch, ), complex tensor
+        local energy estimator
+
+    Returns
+    -------
+     loss (eq. B3 from the PRB)
+
+    Computes Gk = <<2Re[(Eloc-<<Eloc>>) Dk*]>>
+    where Dk = d log Psi / d pk, pk is the NN parameter
+
+    Note: since the transformer wavefunction is normalized, we should have
+    <<Dk>> = 0, and Gk has the simplified expression
+    Gk = <<2Re[Eloc Dk*]>>
+    """
+
     log_amp, log_phase, _ = compute_psi(model, samples, check_duplicate=True)
 
     E = Eloc
@@ -496,7 +635,9 @@ def compute_grad(model, samples, sample_weight, Eloc, ave, idxns):
         log_phase[ind2] = 0
         sample_weight[ind2] = 0
 
-    loss = ((E.real * log_amp + E.imag * log_phase) * sample_weight).sum()
+    loss = (
+        (E.real * log_amp + E.imag * log_phase) * sample_weight
+    ).sum()
     # loss = (
     #     (E.real * log_amp + E.imag * log_phase) * sample_weight
     # ).sum() - ave * log_amp * sample_weight.sum()
@@ -515,6 +656,12 @@ def compute_observableFMHF(
     alfa2,
     alfa3,
 ):
+    """
+    Adaption of fermionHfobservables from Perle's thesis with Hartree Fock matrix.
+    # Automatically calculate hartree fock as an initial step, then send the matrices here.
+    """
+    # start_time00 = time.perf_counter()
+
     # Get the probabilities of previous samples
     log_amp, log_phase, _ = compute_psi(
         model, samples, check_duplicate=True
@@ -537,6 +684,10 @@ def compute_observableFMHF(
         [int(kind[0]) for kind in k], dtype=torch.long, device=samples.device
     )
 
+    # First get ALL the PSIs for the exchanges in one forward in the transformer, we do
+    # this by defining the array sp
+    # samples = 1-samples
+
     sample_int = (samples).detach().clone()
 
     # Create a mask for flipping the spins
@@ -545,7 +696,8 @@ def compute_observableFMHF(
 
     # Flip the selected electrons in the k_indices positions
     sflip = sample_int.unsqueeze(0).expand(len(k), -1, -1).clone().detach()
-    sflip[flip_mask] = -(sflip[flip_mask] - 1)  # 0 goes 1 and 1 goes to 0
+    #sflip[flip_mask] = 1 - sflip[flip_mask]  # 0 goes 1 and 1 goes to 0
+    sflip[flip_mask] = -(sflip[flip_mask]-1)  # 0 goes 1 and 1 goes to 0
 
     sp = sflip.permute(1, 2, 0).reshape(
         n, n * batch
@@ -574,7 +726,11 @@ def compute_observableFMHF(
         ns[i] = torch.sum(samples[:, i])
     for i in range(batch2):
         nsp[i] = torch.sum(sp[:, i])
+    # end_time = time.perf_counter()
+    # execution_time = end_time - start_time00
+    # print(f"1. T for getting samples in Hloc: {execution_time} seconds")
 
+    ##start_time00 = time.perf_counter()
     results, results2, results3, occupation = Hloc(
         samples,
         Uk,
@@ -593,6 +749,9 @@ def compute_observableFMHF(
         sig,
         k_indices,
     )
+    ##end_time = time.perf_counter()
+    ##execution_time = end_time - start_time00
+    ##print(f"2. T for getting Hloc: {execution_time} seconds")
 
     # -------------------------------------- Interaction term V(q) --------------------------
 
@@ -612,6 +771,7 @@ def compute_observableFMHF(
     nt = n_exch * 4  # Total number of possible scattering from V(q) per batch
     nt_batch = 4 * n_exch * batch  # total number of scattering for all batches
 
+    ###start_time = time.perf_counter()
     # Create index tensors
     kq_indices = torch.arange(n_exch)
     batch_indices = torch.arange(batch_size)
@@ -625,7 +785,7 @@ def compute_observableFMHF(
         (k_indices_expanded - q_indices_expanded) % n
     ).long()  # Scattering tensor, %n referes to PBC # (n_k, n_q)
     # Note: The normal loop is appended over n_q for every q : - > concatenate over the first dimension (n_k)
-    # This form of concatenation is actually fine, for s_psis_p_d1 just go over 0:63, for s_psis_p_d2 from 64+(0:63) etc (This example is for N=6)
+    # This form of concatenation is actually fine, for s_psis_p_d1 just go over 0:63, for s_psis_p_d2 from 64+(0:63) etc
 
     # Reshape indices to (n_k* n_q, 1)
     k_indices_flat = k_indices_expanded.reshape(-1)  # (n_exch)

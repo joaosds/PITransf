@@ -34,7 +34,7 @@ cd quantum-state-transformer
 
 ### Environment Setup
 
-You can set up the environment in different ways: using conda (with mamba) or using virtualenv, for example. We recommend the last one:
+You can set up the environment in different ways: using conda (e.g. with mamba) or virtualenv. We recommend the last one. First, make sure you have virtualenv installed, then: 
 
 1. **Create virtual environment:**
 ```bash

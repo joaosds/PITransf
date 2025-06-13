@@ -1,12 +1,12 @@
-# Physics-informed Transformers for Electronic Quantum States
+# Physics-informed Transformer for Electronic Quantum States
 
 <p align="center">
-<img src="logo.pdf" width=50% height=50%>
+<img src="logo.png" width=50% height=50%>
 </p>
 
 ---
 
-This repository contains all the scripts used to generate and analyze the data in the paper "Transformer in variational bases for electronic quantum states".
+This repository contains all the scripts used to generate and analyze the data in the paper "Physics-informed Transformer for Electronic Quantum States".
 
 
 **Authors:** João Augusto Sobral (University of Stuttgart), Michael Perle (University of Innsbruck) and Mathias S. Scheurer (University of Stuttgart).
@@ -34,14 +34,56 @@ cd quantum-state-transformer
 
 ### Environment Setup
 
-Create the required conda environments:
+You can set up the environment in two ways: using conda (recommended) or using virtualenv.
 
+### Option 1: Using Conda (Recommended)
+
+1. **Create environment from file:**
 ```bash
-# Create Hartree-Fock environment
-conda env create -f environment_hf.yml
+conda env create -f environment.yml
+```
 
-# Create Transformer environment  
-conda env create -f environment_transformer.yml
+2. **Activate the environment:**
+```bash
+conda activate pitransf
+```
+
+### Option 2: Using Virtualenv + Pip
+
+1. **Create virtual environment:**
+```bash
+python -m venv pitransf
+```
+
+2. **Activate the environment:**
+   - **Linux/Mac:**
+     ```bash
+     source pitransf/bin/activate
+     ```
+   - **Windows:**
+     ```bash
+     pitransf\Scripts\activate
+     ```
+
+3. **Install dependencies:**
+```bash
+# Upgrade pip first
+pip install --upgrade pip
+
+# Install all dependencies from requirements.txt
+pip install -r requirements.txt
+```
+
+4. **For CUDA support (if available):**
+```bash
+# Replace the default PyTorch with CUDA version (You may need to change this depending on the cuda version you may have installed)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+5. **For CPU-only (no CUDA):**
+```bash
+# Replace the default PyTorch with CPU version
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
 ## Short Instructions
@@ -53,15 +95,7 @@ Run with default parameters:
 ./main.sh
 ```
 
-Run with custom parameters:
-```bash
-N=8 t=0.1 basis="hf" ./main.sh
-```
-
-Use a configuration file:
-```bash
-CONFIG_FILE=my_config.sh ./main.sh
-```
+To run with custom parameters, please edit the "config.sh" file. 
 
 ### Configuration
 
@@ -73,10 +107,10 @@ cp config.sh my_config.sh
 
 **Key Parameters:**
 - `N`: System size (number of particles/sites)
-- `t`: Hopping parameter  
+- `t`: Hopping parameter (understood as t/U)  
 - `basis`: Basis type (`"hf"`, `"chiral"`, or `"band"`)
-- `niter`: Training iterations (default: 20000)
-- `embedding_size`: Embedding dimension (default: 300)
+- `niter`: Training iterations
+- `embedding_size`: Embedding dimension
 
 ### Project Structure
 
@@ -84,7 +118,6 @@ cp config.sh my_config.sh
 .
 ├── main.sh                          # Main execution script
 ├── config.sh                        # Configuration template
-├── environment_hf.yml               # HF environment
 ├── environment_transformer.yml      # Transformer environment
 ├── hartree-fock/                    # HF calculation code
 ├── transformer_quantum_state/       # Transformer code

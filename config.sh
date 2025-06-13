@@ -69,8 +69,7 @@ cuda_device=0
 
 # Conda environment names
 # Make sure these environments exist and have the required packages
-hf_env="transf"
-transformer_env="transf"
+env="pitransf"
 
 # =============================================================================
 # EXECUTION MODE

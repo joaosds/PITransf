@@ -46,8 +46,7 @@ cuda_device=${cuda_device:-0}       # CUDA device
 ed_limit=${ed_limit:-11}            # ED calculation limit for system size
 
 # Environment names (can be overridden)
-hf_env=${hf_env:-"quantum_hf"}
-transformer_env=${transformer_env:-"quantum_transformer"}
+env=${env:-"pitransf"}
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -146,8 +145,8 @@ run_hartree_fock() {
     
     print_header "Hartree-Fock Calculation ($mode mode)"
     
-    check_env "$hf_env"
-    activate_env "$hf_env"
+    check_env "$env"
+    activate_env "$env"
     
     # Set up Python path for HF modules
     export PYTHONPATH="${PYTHONPATH}:$HF_DIR/masterproject-develop/"
@@ -169,8 +168,8 @@ run_basis_energy() {
     
     print_header "Energy Calculation for $basis_type Basis"
     
-    check_env "$hf_env"
-    activate_env "$hf_env"
+    check_env "$env"
+    activate_env "$env"
     
     export PYTHONPATH="${PYTHONPATH}:$HF_DIR/masterproject-develop/"
     cd "$HF_DIR/masterproject-develop/"
@@ -206,8 +205,8 @@ run_transformer() {
     
     print_header "Transformer $mode"
     
-    check_env "$transformer_env"
-    activate_env "$transformer_env"
+    check_env "$env"
+    activate_env "$env"
     
     cd "$TRANSFORMER_DIR"
     

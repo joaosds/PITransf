@@ -30,7 +30,10 @@ dependencies:
     # Additional scientific packages
     - tqdm  # Progress bars
     - h5py  # HDF5 file format support
+    
+    # Quantum/physics specific (if needed)
     - qutip  # Quantum toolkit (optional)
+    
     # Development and utilities
     - black  # Code formatting
     - flake8  # Code linting

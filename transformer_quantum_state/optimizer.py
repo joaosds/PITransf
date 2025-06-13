@@ -207,8 +207,8 @@ class Optimizer:
 
         end_time = time.perf_counter()
         execution_time = end_time - start_time
-        if ind % 100 == 0:
-            print(f"TEST1: {execution_time} seconds")
+        #if ind % 100 == 0:
+        #    print(f"TEST1: {execution_time} seconds")
 
         # === NORMALIZATION AND ENERGY CALCULATION ===
         start_time = time.perf_counter()
@@ -340,12 +340,13 @@ class Optimizer:
 
         # Logging
         if ind % 100 == 0:
-            print(batch_per_section, sec_batch, "aha")
+            #print("current nu", batch_per_section)
+            #print("Local estimators are divided in ", sec_batch, "batches")
             print(
                 f"alfa1={alfa1}, Ehf/norm={Ehf * (alfa1) ** 2 / norm}, norm2={norm}, "
                 f"lamb={lambd}, batch={batch}"
             )
-            print(f"E_var={E_var}, vscore={vscore}, {vscore2}, {einfty/H.n}")
+            #print(f"E_var={E_var}, vscore={vscore}, {vscore2}, {einfty/H.n}")
             print()
 
             end_time = time.perf_counter()

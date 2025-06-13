@@ -34,21 +34,7 @@ cd quantum-state-transformer
 
 ### Environment Setup
 
-You can set up the environment in two ways: using conda (recommended) or using virtualenv.
-
-### Option 1: Using Conda (Recommended)
-
-1. **Create environment from file:**
-```bash
-conda env create -f requirements.yml
-```
-
-2. **Activate the environment:**
-```bash
-conda activate pitransf
-```
-
-### Option 2: Using Virtualenv + Pip
+You can set up the environment in different ways: using conda (with mamba) or using virtualenv, for example. We recommend the last one:
 
 1. **Create virtual environment:**
 ```bash
@@ -76,7 +62,7 @@ pip install -r requirements.txt
 
 4. **For CUDA support (if available):**
 ```bash
-# Replace the default PyTorch with CUDA version (You may need to change this depending on the cuda version you may have installed)
+# Replace the default PyTorch with CUDA version (You may need to change this depending on the cuda version you may have installed. This can be usually checked with nvidia-smi command.)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
 
@@ -98,26 +84,17 @@ Run with default parameters ($N_{e}=6$, $t/U=0.18$ and hf-basis):
 To run with custom parameters, please edit the "config.sh" file. This file already explains each of the parameters, but here are some additional comments with the 
 corresponding notation on the main text:
 
-- `N`: System size (number of electrons) [$N_{e}$]
-- `t`: Hopping parameter  [$t/U$]
-- `basis`: Basis type (`"hf"`, `"chiral"`, or `"band"`)
-- `niter`: Training iterations [Epochs]
-- `embedding_size`: Embedding dimension [$d_{\text{emb}}$]
-- `ndec_layer`: Number of transformer decoder layers [$N_{\text{dec}}$]
-- `nhead`: Number of transformer attention heads [$N_{\text{h}}$]
-- `nunique`: Number of unique states for the batch-autoregressive sampler[$N_{u}$]. Note that if this is less than $2^{N_{e}}$, $n_{u}^{f}$ may be different from this value. See ref. [38] on the main text for more details.
-- `nbatch`: Batch size for the batch-autoregressive sampler [$N_{s}$]
-- `sec_batch`: Parallel batch size [$N_{\text{h}}$]. This divides the number of local energy estimators. This is very useful when running the code on a gpu, especially when using either the chiral or band bases. 
+- `N`: System size (number of electrons) ($N_{e}$).
+- `t`: Hopping parameter  ($t/U$).
+- `basis`: Basis type (`"hf"`, `"chiral"`, or `"band"`).
+- `niter`: Training iterations (Epochs).
+- `embedding_size`: Embedding dimension ($d_{\text{emb}}$).
+- `ndec_layer`: Number of transformer decoder layers ($N_{\text{dec}}$).
+- `nhead`: Number of transformer attention heads ($N_{\text{h}}$).
+- `nunique`: Number of unique states for the batch-autoregressive sampler ($N_{u}$). Note that if this is less than $2^{N_{e}}$, $n_{u}^{f}$ may be different from this value. See ref. [38] on the main text for more details.
+- `nbatch`: Batch size for the batch-autoregressive sampler ($N_{s}$).
+- `sec_batch`: Parallel batch size ($N_{\text{h}}$). This divides the number of local energy estimators. This is very useful when running the code on a GPU, especially when using either the chiral or band bases. 
 - `identifier`: String identifier for the plots and result files.
-
-### Configuration
-
-Copy the template and modify:
-```bash
-cp config.sh my_config.sh
-# Edit my_config.sh with your parameters
-```
-
 
 ### Project Structure
 
@@ -125,7 +102,7 @@ cp config.sh my_config.sh
 .
 ├── main.sh                          # Main execution script
 ├── config.sh                        # Configuration template
-├── environment_transformer.yml      # Transformer environment
+├── requirements.yml		     # Python environment
 ├── hartree-fock/                    # HF calculation code
 ├── transformer_quantum_state/       # Transformer code
 │   ├── main.py                      # Main transformer script

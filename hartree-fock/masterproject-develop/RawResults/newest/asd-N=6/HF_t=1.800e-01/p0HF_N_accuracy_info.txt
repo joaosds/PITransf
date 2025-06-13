@@ -1,0 +1,1 @@
+accuracy after 114 iterations = 8.42097108926842e-11

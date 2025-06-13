@@ -245,11 +245,7 @@ def main(path0, ff1, ff2, ff3, ff4, potential_function, t, N, identifier, info_s
     # If matrix element is 0 = > True = 1 
     # If matrix element is not zero = > False = 0
     matrixsize = matrix.size
-    print(sp, sp/matrixsize, "sparsity")
     wh, vh = eigh(operatorMatrixHermitian)
-    print(matrix)
-    print(isinstance(matrix, scipy.sparse.sparray))
-    print(scipy.sparse.issparse(matrix))
     # fp.write(f"{numberBZ}\t{wh[0]}\n")
     fp.write(f"\n{t}\t{wh[0]/N}")
     print("Ground state energy: " + str(wh[0] / (N)))

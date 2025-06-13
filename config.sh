@@ -69,7 +69,7 @@ cuda_device=0
 
 # Conda environment names
 # Make sure these environments exist and have the required packages
-env="pitransf"
+venv_name="pitransf"
 
 # =============================================================================
 # EXECUTION MODE

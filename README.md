@@ -60,18 +60,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-4. **For CUDA support (if available):**
-```bash
-# Replace the default PyTorch with CUDA version (You may need to change this depending on the cuda version you may have installed. This can be usually checked with nvidia-smi command.)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-```
-
-5. **For CPU-only (no CUDA):**
-```bash
-# Replace the default PyTorch with CPU version
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-
 ## Short Instructions
 
 ### Basic Usage

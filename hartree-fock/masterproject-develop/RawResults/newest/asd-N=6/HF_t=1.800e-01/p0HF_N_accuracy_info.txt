@@ -1,1 +1,1 @@
-accuracy after 114 iterations = 8.42097108926842e-11
+accuracy after 115 iterations = 8.342505718679527e-11

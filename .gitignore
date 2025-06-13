@@ -1,2 +1,4 @@
 pitransf/
 .DS_Store
+results/
+transformer_quantum_state/results/

@@ -28,7 +28,7 @@ If you have any questions please reach out by joao.sobral@itp3.uni-stuttgart.de.
 ## Install from Github
 
 ```bash
-git clone https://github.com/your-username/PITransf
+git clone https://github.com/joaosds/PITransf.git
 cd PITransf
 ```
 

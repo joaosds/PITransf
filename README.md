@@ -28,8 +28,8 @@ If you have any questions please reach out by joao.sobral@itp3.uni-stuttgart.de.
 ## Install from Github
 
 ```bash
-git clone https://github.com/your-username/quantum-state-transformer
-cd quantum-state-transformer
+git clone https://github.com/your-username/PITransf
+cd PITransf
 ```
 
 ### Environment Setup

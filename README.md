@@ -1,7 +1,7 @@
 # Physics-informed Transformer for Electronic Quantum States
 
 <p align="center">
-<img src="log.png" width=60% height=60%>
+<img src="log.png" width="40%">
 </p>
 
 ---

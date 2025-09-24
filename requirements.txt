@@ -1,6 +1,7 @@
 torch>=2.0.0
 torchvision
 torchaudio
+imageio 
 
 # Core scientific computing
 numpy>=1.21.0

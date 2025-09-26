@@ -115,7 +115,7 @@ activate_venv() {
     source "$activate_script"
     
     # Verify activation
-    if [[ "$VIRTUAL_ENV" == "$venv_path" ]]; then
+    if [[ -n "$VIRTUAL_ENV" ]]; then
         print_success "Virtual environment activated successfully"
         print_info "Using Python: $(which python3)"
     else

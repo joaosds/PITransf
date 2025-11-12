@@ -56,7 +56,7 @@ sampler="tree"
 identifier="default_run"
 
 # CUDA device number (0, 1, 2, etc.)
-cuda_device=0
+cuda_device=3
 
 # =============================================================================
 # ENVIRONMENT CONFIGURATION

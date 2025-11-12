@@ -15,7 +15,7 @@ The main code is adapted from [Yuanhangzhang98/transformer_quantum_state](https:
 
 João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open source).
 
-If you have any questions please reach out by joao.sobral@itp3.uni-stuttgart.de.
+If you have any questions please reach out to joao.sobral@itp3.uni-stuttgart.de.
 
 ---
 

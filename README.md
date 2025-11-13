@@ -16,7 +16,7 @@ The main code is adapted from [Yuanhangzhang98/transformer_quantum_state](https:
 João is thankful for insightful discussions with Yuan-Hang Zhang (also for making his code for the transformer_quantum_state open source).
 
 
-The minimum dataset folder containing data to reproduce Fig. 2a,d, Fig. 3a,b and Supp. Fig. 3. Data from Fig. 2b,c, Fig. 4, Fig. 5, and all other Supplementary Information figures can be readily reproduced with the source code.
+The minimum dataset folder contains the data to reproduce Fig. 2a,d, Fig. 3a,b and Supp. Fig. 3. Data from Fig. 2b,c, Fig. 4, Fig. 5, and all other Supplementary Information figures can be readily reproduced with the source code.
 
 If you have any questions please reach out to joao.sobral@itp3.uni-stuttgart.de.
 
